@@ -6,6 +6,7 @@ from normalization import Normalization
 import os
 import copy
 import torch
+import torch.nn as nn
 import torchvision.models as models
 import torch.optim as optim
 
@@ -16,8 +17,8 @@ params = {
 }
 
 def run_style_transfer(cnn, normalization_mean, normalization_std,
-                       content_img, style_img, input_img, num_steps=300,
-                       style_weight=1000000, content_weight=1):
+                       content_img, style_img, input_img, content_layers, style_layers, device,
+                       num_steps=300, style_weight=1000000, content_weight=1):
     """Run the style transfer."""
     print('Building the style transfer model..')
     model, style_losses, content_losses = get_style_model_and_losses(
@@ -25,7 +26,10 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
         normalization_mean, 
         normalization_std, 
         style_img, 
-        content_img)
+        content_img,
+        content_layers,
+        style_layers,
+        device)
     optimizer = get_input_optimizer(input_img)
 
     print('Optimizing..')
@@ -67,7 +71,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
     return input_img
 
 def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
-                               style_img, content_img, content_layers, style_layers):
+                               style_img, content_img, content_layers, style_layers, device):
     cnn = copy.deepcopy(cnn)
     normalization = Normalization(normalization_mean, normalization_std).to(device)
 
@@ -145,7 +149,10 @@ def main():
         content_image, 
         style_image, 
         input_image,
-        num_steps=10)
+        content_layers_default,
+        style_layers_default,
+        device,
+        num_steps=300)
     save_image(output_image, output_image_path)
     
 if __name__ == "__main__":

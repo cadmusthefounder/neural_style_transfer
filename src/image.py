@@ -1,6 +1,7 @@
 from PIL import Image
 
 import torch
+import torchvision
 import torchvision.transforms as transforms
 
 def image_loader(image_name, image_size, device=torch.device("cpu")):
