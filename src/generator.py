@@ -13,7 +13,7 @@ import torch.optim as optim
 params = {
     'content_image': 'dancing.jpg',
     'style_image': 'picasso.jpg',
-    'output_image': 'output.jpg'
+    'output_image': 'output2.jpg'
 }
 
 def run_style_transfer(cnn, normalization_mean, normalization_std,
@@ -133,7 +133,7 @@ def main():
 
     content_image = image_loader(content_image_path, image_size, device=device)
     style_image = image_loader(style_image_path, image_size, device=device)
-    input_image = torch.randn(content_image.data.size(), device=device)
+    input_image = content_image.clone()
     assert content_image.size() == style_image.size()
 
     cnn = models.vgg19(pretrained=True).features.to(device).eval()
