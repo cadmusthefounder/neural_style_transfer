@@ -11,13 +11,14 @@ import torchvision.models as models
 import torch.optim as optim
 
 params = {
-    'content_image': 'dancing.jpg',
+    'content_image': 'charlton6.jpg',
     'style_image': 'picasso.jpg',
-    'output_image': 'output2.jpg'
+    'output_image': 'output18_{}.jpg'
 }
 
 def run_style_transfer(cnn, normalization_mean, normalization_std,
-                       content_img, style_img, input_img, content_layers, style_layers, device,
+                       content_img, style_img, input_img, output_image_path, 
+                       content_layers, style_layers, device,
                        num_steps=300, style_weight=1000000, content_weight=1):
     """Run the style transfer."""
     print('Building the style transfer model..')
@@ -61,6 +62,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
                 print("run {}:".format(run))
                 print('Style Loss : {:4f} Content Loss: {:4f}'.format(
                     style_score.item(), content_score.item()))
+                save_image(input_img, output_image_path.format(run[0]))
                 print()
 
             return style_score + content_score
@@ -124,7 +126,7 @@ def get_input_optimizer(input_img):
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    image_size = 512 if torch.cuda.is_available() else 256
+    image_size = (1028, 1028) if torch.cuda.is_available() else (512, 512)
 
     current_directory = os.path.dirname(os.path.abspath(__file__))
     content_image_path = os.path.join(current_directory, '..', 'contents', params['content_image'])
@@ -134,6 +136,8 @@ def main():
     content_image = image_loader(content_image_path, image_size, device=device)
     style_image = image_loader(style_image_path, image_size, device=device)
     input_image = content_image.clone()
+    print(content_image.size())
+    print(style_image.size())
     assert content_image.size() == style_image.size()
 
     cnn = models.vgg19(pretrained=True).features.to(device).eval()
@@ -142,18 +146,18 @@ def main():
     content_layers_default = ['conv_4']
     style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
-    output_image = run_style_transfer(
+    run_style_transfer(
         cnn, 
         cnn_normalization_mean, 
         cnn_normalization_std,
         content_image, 
         style_image, 
         input_image,
+        output_image_path,
         content_layers_default,
         style_layers_default,
         device,
         num_steps=300)
-    save_image(output_image, output_image_path)
     
 if __name__ == "__main__":
     main()
